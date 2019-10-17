@@ -5,4 +5,30 @@ package com.casper.testdrivendevelopment;
  */
 
 public class Book {
+    private String title;
+    private int CoverResourceId;
+
+    public Book(String title, int coverResourceId) {
+        this.title = title;
+        CoverResourceId = coverResourceId;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getCoverResourceId() {
+        return CoverResourceId;
+    }
+
+    public void setCoverResourceId(int coverResourceId) {
+        CoverResourceId = coverResourceId;
+    }
+
+
 }
