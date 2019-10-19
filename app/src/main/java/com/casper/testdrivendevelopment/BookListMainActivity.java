@@ -21,6 +21,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.casper.testdrivendevelopment.data.BookServer;
+import com.casper.testdrivendevelopment.data.model.Book;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,18 +38,29 @@ public class BookListMainActivity extends AppCompatActivity {
     private ArrayList<Book> listBooks;
     private ListView listViewBooks;
     BooksArrayAdapter bookAdapter;
+    BookServer bookServer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list_main);
 
-        InitData();
+        bookServer = new BookServer(this);
+        listBooks = bookServer.load();
+        if (listBooks.size() == 0){
+            InitData();
+        }
 
         listViewBooks =findViewById(R.id.list_view_books);
         bookAdapter =new BooksArrayAdapter(this, R.layout.list_item_books, listBooks);
         listViewBooks.setAdapter(bookAdapter);
 
         this.registerForContextMenu(listViewBooks);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bookServer.save();
     }
 
     @Override
@@ -153,7 +167,6 @@ public class BookListMainActivity extends AppCompatActivity {
     }
 
     private void InitData() {
-        listBooks = new ArrayList<>();
         listBooks.add(new Book("软件项目管理案例教程（第4版）", 38.00, R.drawable.book_2 ));
         listBooks.add(new Book("创新工程实践", 35.00,R.drawable.book_no_name));
         listBooks.add(new Book("信息安全数学基础（第2版）", 40.00,R.drawable.book_1));
