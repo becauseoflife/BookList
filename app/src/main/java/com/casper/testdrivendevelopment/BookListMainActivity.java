@@ -7,6 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -23,6 +26,7 @@ import android.widget.Toast;
 
 import com.casper.testdrivendevelopment.data.BookServer;
 import com.casper.testdrivendevelopment.data.model.Book;
+import com.casper.testdrivendevelopment.data.model.BookFragmentAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +40,6 @@ public class BookListMainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_NEW_BOOK = 901;
     private static final int REQUEST_CODE_UPDATE_BOOK = 902;
     private ArrayList<Book> listBooks;
-    private ListView listViewBooks;
     BooksArrayAdapter bookAdapter;
     BookServer bookServer;
     @Override
@@ -50,23 +53,35 @@ public class BookListMainActivity extends AppCompatActivity {
             InitData();
         }
 
-        listViewBooks =findViewById(R.id.list_view_books);
         bookAdapter =new BooksArrayAdapter(this, R.layout.list_item_books, listBooks);
-        listViewBooks.setAdapter(bookAdapter);
 
-        this.registerForContextMenu(listViewBooks);
+        BookFragmentAdapter myPageAdapter = new BookFragmentAdapter(getSupportFragmentManager());
+
+        ArrayList<Fragment> datas = new ArrayList<>();
+        datas.add(new BookListFragment(bookAdapter));
+        myPageAdapter.setData(datas);
+
+        ArrayList<String> titles = new ArrayList<String>();
+        titles.add("A");
+        myPageAdapter.setTitles(titles);
+
+        TabLayout tabLayout = findViewById(R.id.tablayout);
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        viewPager.setAdapter(myPageAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         bookServer.save();
     }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if (v == listViewBooks) {
+        if (v == findViewById(R.id.list_view_books)) {
             //获取适配器
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
             //设置标题
@@ -172,7 +187,7 @@ public class BookListMainActivity extends AppCompatActivity {
         listBooks.add(new Book("信息安全数学基础（第2版）", 40.00,R.drawable.book_1));
     }
 
-    private class BooksArrayAdapter extends ArrayAdapter<Book> {
+    public class BooksArrayAdapter extends ArrayAdapter<Book> {
         private int resourceId;
         public BooksArrayAdapter(@NonNull Context context, int resource, @NonNull List<Book> objects) {
             super(context, resource, objects);
@@ -189,6 +204,7 @@ public class BookListMainActivity extends AppCompatActivity {
             TextView bookTitle = item.findViewById(R.id.text_view_book_title);
 
             Book book_item = this.getItem(position);
+            //book_item.setCoverResourceId(R.drawable.book_no_name);
             bookImage.setImageResource(book_item.getCoverResourceId());
             bookTitle.setText(book_item.getTitle()+ "," + book_item.getPrice() + "元");
 
