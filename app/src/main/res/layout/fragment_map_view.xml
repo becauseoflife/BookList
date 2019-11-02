@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WebViewFragment">
+    tools:context=".MapViewFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
-
-    <WebView
-        android:id="@+id/web_view"
+    <com.baidu.mapapi.map.MapView
+        android:id="@+id/bmapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true" />
+
 </FrameLayout>

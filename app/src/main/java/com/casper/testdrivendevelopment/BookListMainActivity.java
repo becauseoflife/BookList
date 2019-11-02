@@ -60,7 +60,7 @@ public class BookListMainActivity extends AppCompatActivity {
         ArrayList<Fragment> datas = new ArrayList<>();
         datas.add(new BookListFragment(bookAdapter));
         datas.add(new WebViewFragment());
-        datas.add(new WebViewFragment());
+        datas.add(new MapViewFragment());
         myPageAdapter.setData(datas);
 
         ArrayList<String> titles = new ArrayList<String>();
