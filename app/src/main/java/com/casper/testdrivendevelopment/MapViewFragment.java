@@ -1,7 +1,11 @@
 package com.casper.testdrivendevelopment;
 
 
+import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +24,10 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.TextOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.casper.testdrivendevelopment.data.ShopLoader;
+import com.casper.testdrivendevelopment.data.model.Shop;
+
+import java.util.ArrayList;
 
 
 /**
@@ -79,7 +87,38 @@ public class MapViewFragment extends Fragment {
                 }
         });
 
+        final ShopLoader shopLoader = new ShopLoader();
+        @SuppressLint("HandlerLeak") Handler handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                drawShop(shopLoader.getShops());
+            }
+        };
+        shopLoader.load(handler, "http://file.nidama.net/class/mobile_develop/data/bookstore.json");
+
         return view;
+    }
+
+    void drawShop(ArrayList<Shop> shops)
+    {
+        if (mMapView == null) return;
+        BaiduMap baiduMap = mMapView.getMap();
+        for (int i = 0; i< shops.size(); i++)
+        {
+            Shop shop = shops.get(i);
+
+            LatLng centp = new LatLng(shop.getLatitude(), shop.getLongitude()); // 设置中心点坐标
+
+            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.book_icon);
+            // 准备Marker Option 添加 marker 使用
+            MarkerOptions markerOptions = new MarkerOptions().icon(bitmap).position(centp);
+            // 获取添加 marker 这样呢便于后续的操作
+            Marker marker = (Marker) baiduMap.addOverlay(markerOptions);
+
+            OverlayOptions textOption = new TextOptions().bgColor(0xAAFFFF00).fontSize(50)
+                    .text(shop.getName()).rotate(0).position(centp);
+            baiduMap.addOverlay(textOption);
+        }
     }
 
     private MapView mMapView = null;
