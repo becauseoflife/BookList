@@ -58,15 +58,17 @@ public class BookListMainActivityTest2 {
 
     @Test
     public void bookListMainActivityTest2() {
-        ViewInteraction textView = onView(
-                allOf(withId(android.R.id.title), withText("修改"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("com.android.internal.view.menu.ListMenuItemView")),
-                                        0),
-                                0),
+
+        ViewInteraction linearLayout =onView(
+                allOf(childAtPosition(
+                    withId(R.id.list_view_books),
+                        1),
                         isDisplayed()));
-        textView.perform(longClick());
+        linearLayout.perform(longClick());
+
+        ViewInteraction textView = onView(
+                allOf(withId(android.R.id.title), withText("修改"), isDisplayed()));
+        textView.perform(click());
 
         ViewInteraction appCompatEditText = onView(
                 allOf(withId(R.id.edit_text_book_title), withText("创新工程实践"),
