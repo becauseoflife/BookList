@@ -23,6 +23,7 @@ import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.TextOptions;
+import com.baidu.mapapi.map.TextureMapView;
 import com.baidu.mapapi.model.LatLng;
 import com.casper.testdrivendevelopment.data.ShopLoader;
 import com.casper.testdrivendevelopment.data.model.Shop;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
  * A simple {@link Fragment} subclass.
  */
 public class MapViewFragment extends Fragment {
-
+    private TextureMapView mMapView = null;
 
     public MapViewFragment() {
         // Required empty public constructor
@@ -121,7 +122,6 @@ public class MapViewFragment extends Fragment {
         }
     }
 
-    private MapView mMapView = null;
     @Override
     public void onResume() {
         super.onResume();
