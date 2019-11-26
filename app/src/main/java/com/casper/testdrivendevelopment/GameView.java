@@ -19,30 +19,38 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private final SurfaceHolder surfaceHolder;
     private DrawThread drawThread;
     private ArrayList<Sprite> sprites = new ArrayList<>();
+    private ArrayList<Mouse> mice = new ArrayList<>();
 
+    private Canvas canvas = null;
+    private Mouse mouse1;
 
     private float xTouch, yTouch;
     private int clickCount;
 
     @SuppressLint("ClickableViewAccessibility")
-    public GameView(Context context) {
+    public GameView(final Context context) {
         super(context);
         surfaceHolder = this.getHolder();
         surfaceHolder.addCallback(this);
 
+/*        sprites.add(new Sprite(R.drawable.book_icon));
         sprites.add(new Sprite(R.drawable.book_icon));
         sprites.add(new Sprite(R.drawable.book_icon));
-        sprites.add(new Sprite(R.drawable.book_icon));
-        sprites.add(new Sprite(R.drawable.book_icon));
+        sprites.add(new Sprite(R.drawable.book_icon));*/
 
 
-
+        mouse1 = new Mouse();
 
         this.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 xTouch = event.getX();
                 yTouch = event.getY();
+                if (mouse1.getX() < xTouch && xTouch < mouse1.getxOffset() && mouse1.getY() < yTouch && yTouch < mouse1.getyOffset()){
+                    ClickDraw();
+                    xTouch = -1;
+                    yTouch = -1;
+                }
                 return true;
             }
         });
@@ -68,7 +76,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             drawThread.stopThread();
             drawThread = null;
         }
-
     }
 
     private class DrawThread extends Thread{
@@ -89,7 +96,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         public void run(){
             beAlive = true;
             while (beAlive){
-                Canvas canvas = null;
                 try {
                     synchronized (surfaceHolder){
                         canvas = surfaceHolder.lockCanvas();    // 锁住画布
@@ -101,9 +107,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         paint.setColor(Color.BLACK);
                         canvas.drawText("击中" + clickCount + "个",50, 50, paint);
 
-
-                        for (Sprite sprite:sprites) sprite.move();      // 让所有精灵移动
-                        for (Sprite sprite:sprites) sprite.draw(canvas);   // 让所有精灵画图
+                        int[] xHole = {getWidth() / 5, getWidth() / 5 * 2, getWidth() / 5 * 3};
+                        int[] yHole = {getHeight() / 5, getHeight() / 5 * 2, getHeight() / 5 * 3};
+                        mouse1.draw(canvas, xHole, yHole);
 
                     }
                 }catch (Exception e){
@@ -116,11 +122,53 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 }
                 // 休眠10毫秒开始刷新下一轮
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(700);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void ClickDraw()
+    {
+        clickCount++;
+
+        canvas = surfaceHolder.lockCanvas();    // 锁住画布
+        canvas.drawColor(Color.WHITE);      // 画布背景颜色
+
+        // 输出黑色的文本
+        Paint paint = new Paint();
+        paint.setTextSize(50);
+        paint.setColor(Color.BLACK);
+        canvas.drawText("击中" + clickCount + "个",50, 50, paint);
+
+
+        Drawable drawable1 = getContext().getResources().getDrawable(R.drawable.mole);
+
+        int holeOffsetX = drawable1.getIntrinsicWidth()/2;
+        int holeOffsetY = drawable1.getIntrinsicHeight()/2;
+        int[] xHole = {getWidth() / 5, getWidth() / 5 * 2, getWidth() / 5 * 3};
+        int[] yHole = {getHeight() / 5, getHeight() / 5 * 2, getHeight() / 5 * 3};
+        for (int x : xHole) {
+            for (int y : yHole) {
+                canvas.drawCircle(x + holeOffsetX, y + holeOffsetY, 130, new Paint());
+            }
+        }
+
+        Drawable drawable = getContext().getResources().getDrawable(R.drawable.whack_a_mole);
+        int xOffset = mouse1.getX() + drawable.getIntrinsicWidth();
+        int yOffset = mouse1.getY() + drawable.getIntrinsicHeight();
+        Rect drawableRect = new Rect(mouse1.getX(), mouse1.getY(), xOffset, yOffset);
+        drawable.setBounds(drawableRect);
+        drawable.draw(canvas);
+
+        mouse1.setX(getWidth());
+        mouse1.setY(getHeight());
+
+        if (null != canvas){
+        // 把绘制好的内容提交上去
+        surfaceHolder.unlockCanvasAndPost(canvas);
         }
     }
 
@@ -169,4 +217,75 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    //
+    private class Mouse {
+        private int x,y;    // 位置
+        private int xOffset, yOffset;
+        private int[] xHole, yHole;
+
+        public Mouse() {
+            this.x = -1;
+            this.y = -1;
+            this.xOffset = -1;
+            this.yOffset = -1;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public void setY(int y) {
+            this.y = y;
+        }
+
+        public int getxOffset() {
+            return xOffset;
+        }
+
+        public int getyOffset() {
+            return yOffset;
+        }
+
+        public void appear()
+        {
+            // 随机生成位置
+            Random random = new Random();
+            int pX = random.nextInt(3);
+            int pY = random.nextInt(3);
+            x = xHole[pX];
+            y = yHole[pY];
+
+        }
+
+        public void draw(Canvas canvas, int[] xHole, int[] yHole)
+        {
+            this.xHole = xHole;
+            this.yHole = yHole;
+            this.appear();
+            Drawable drawable = getContext().getResources().getDrawable(R.drawable.mole);
+            // 画洞
+            int holeOffsetX = drawable.getIntrinsicWidth()/2;
+            int holeOffsetY = drawable.getIntrinsicHeight()/2;
+            for (int x : xHole) {
+                for (int y : yHole) {
+                    canvas.drawCircle(x + holeOffsetX, y + holeOffsetY, 130, new Paint());
+                }
+            }
+            // 画出出现的地鼠
+            xOffset = x + drawable.getIntrinsicWidth();
+            yOffset = y + drawable.getIntrinsicHeight();
+            Rect drawableRect = new Rect(x, y, xOffset, yOffset);
+            drawable.setBounds(drawableRect);
+            drawable.draw(canvas);
+        }
+
+    }
 }
